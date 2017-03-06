@@ -6,7 +6,7 @@ from math import sqrt
 from networkx.classes.digraph import DiGraph
 
 def distance(pose1, pose2):
-    return (sqrt((pose1[0]-pose2[0])**2+(pose1[1]-pose2[1])**2)+0.0001)
+    return (sqrt((pose1[0]-pose2[0])**2+(pose1[1]-pose2[1])**2)+0.001)
 
 def reach_waypoint(pose, waypoint, margin):
     if distance(pose, waypoint)<=margin:
@@ -19,6 +19,7 @@ class MotionFts(DiGraph):
         DiGraph.__init__(self, symbols=symbols, type=ts_type, initial=set())
         for (n, label) in node_dict.iteritems():
             self.add_node(n, label=label, status='confirmed')
+            
 
     def add_un_edges(self, edge_list, unit_cost=1):
         for edge in edge_list:
@@ -27,20 +28,21 @@ class MotionFts(DiGraph):
             dist = distance(f_node, t_node)
             self.add_edge(f_node, t_node, weight=dist*unit_cost)
             self.add_edge(t_node, f_node, weight=dist*unit_cost)
+        for node in self.nodes_iter():
+            #self.add_edge(node, node, weight=unit_cost)
+            # allow self-transit to 0-cost
+            self.add_edge(node, node, weight=0)
 
     def add_full_edges(self,unit_cost=1):
         for f_node in self.nodes_iter():
             for t_node in self.nodes_iter():
                 dist = distance(f_node, t_node)
                 if (f_node, t_node) not in self.edges():
-                    if f_node == t_node:
-                        self.add_edge(f_node, t_node, weight= unit_cost)    
-                    else:
-                        self.add_edge(f_node, t_node, weight=dist*unit_cost)
+                    self.add_edge(f_node, t_node, weight=dist*unit_cost)
 
     def set_initial(self, pose):
         init_node = self.closest_node(pose)
-        self.graph['initial'] = set([init_node,])
+        self.graph['initial'] = set([init_node])
         return init_node
 
     def closest_node(self, pose):
@@ -90,7 +92,7 @@ class ActionModel(object):
             guard_expr = parse_guard(guard_formula)
             label = attrib[2]
             self.action[act_name] = (cost, guard_expr, label)
-        self.action['None'] = (1, parse_guard('1'), set()) 
+        self.action['None'] = (0, parse_guard('1'), set()) 
 
     def allowed_actions(self, ts_node_label):
         allow_action = set()
@@ -107,16 +109,11 @@ class MotActModel(DiGraph):
 
     def composition(self, reg, act):
         prod_node = (reg, act)
-        if self.has_node(prod_node):
-            new_label = self.graph['region'].node[reg]['label'].union(self.graph['action'].action[act][2])
-            self.node[prod_node]['label'] = new_label
-            if ((reg in self.graph['region'].graph['initial']) and (act == 'None')):
-                self.graph['initial']= set([prod_node,])
         if not self.has_node(prod_node):
             new_label = self.graph['region'].node[reg]['label'].union(self.graph['action'].action[act][2])
             self.add_node(prod_node, label=new_label, region=reg, action=act, marker='unvisited')
             if ((reg in self.graph['region'].graph['initial']) and (act == 'None')):
-                self.graph['initial']= set([prod_node,])
+                self.graph['initial'].add(prod_node)
         return prod_node
 
     def projection(self, prod_node):
@@ -129,22 +126,19 @@ class MotActModel(DiGraph):
             init_prod_node = self.composition(reg_init, 'None')
 
     def build_full(self):
-        edges = [e for e in self.edges()]
-        self.remove_edges_from(edges)
         for reg in self.graph['region'].nodes_iter():
             for act in self.graph['action'].action.iterkeys():
                 prod_node = self.composition(reg, act)
                 # actions 
                 label = self.graph['region'].node[reg]['label']
                 for act_to in self.graph['action'].allowed_actions(label):
-                    if act_to != 'None':
-                        prod_node_to = self.composition(reg, act_to)
-                        self.add_edge(prod_node, prod_node_to, weight=self.graph['action'].action[act_to][0], label= act_to, marker= 'visited')
+                    prod_node_to = self.composition(reg, act_to)
+                    self.add_edge(prod_node, prod_node_to, weight=self.graph['action'].action[act_to][0], label= act_to, marker= 'visited')
                 # motions
                 for reg_to in self.graph['region'].successors_iter(reg):
-                    prod_node_to = self.composition(reg_to, 'None')
-                    self.add_edge(prod_node, prod_node_to, weight=self.graph['region'][reg][reg_to]['weight'], label= 'goto', marker= 'visited')
-                # note that self-transition in TS is a motion.    
+                    if reg_to != reg:
+                        prod_node_to = self.composition(reg_to, 'None')
+                        self.add_edge(prod_node, prod_node_to, weight=self.graph['region'][reg][reg_to]['weight'], label= 'goto', marker= 'visited')
     
     def fly_successors_iter(self, prod_node): 
         reg, act = self.projection(prod_node)
@@ -158,17 +152,17 @@ class MotActModel(DiGraph):
             # actions 
             label = self.graph['region'].node[reg]['label']
             for act_to in self.graph['action'].allowed_actions(label):
-                if act_to != 'None':
-                    prod_node_to = self.composition(reg, act_to)
-                    cost = self.graph['action'].action[act_to][0]
-                    self.add_edge(prod_node, prod_node_to, weight=cost, label= act_to)
-                    yield prod_node_to, cost
+                prod_node_to = self.composition(reg, act_to)
+                cost = self.graph['action'].action[act_to][0]
+                self.add_edge(prod_node, prod_node_to, weight=cost, label= act_to)
+                yield prod_node_to, cost
             # motions
             for reg_to in self.graph['region'].successors_iter(reg):
-                prod_node_to = self.composition(reg_to, 'None')
-                cost = self.graph['region'][reg][reg_to]['weight']
-                self.add_edge(prod_node, prod_node_to, weight=cost, label= 'goto')         
-                yield prod_node_to, cost
+                if reg_to != reg:
+                    prod_node_to = self.composition(reg_to, 'None')
+                    cost = self.graph['region'][reg][reg_to]['weight']
+                    self.add_edge(prod_node, prod_node_to, weight=cost, label= 'goto')         
+                    yield prod_node_to, cost
             self.graph['region'].node[self.node[prod_node]['region']]['status'] = 'confirmed'
             self.node[prod_node]['marker'] = 'visited'
 
@@ -176,7 +170,7 @@ class MotActModel(DiGraph):
         reg, act = self.projection(prod_node)
         # actions
         label = self.graph['region'].node[reg]['label']
-        if (act in self.graph['action'].allowed_actions(label)) and (act != 'None'):    
+        if act in self.graph['action'].allowed_actions(label):    
             for f_act in self.graph['action'].action.iterkeys():
                 f_prod_node = self.composition(reg, f_act)
                 cost = self.graph['action'].action[act][0]

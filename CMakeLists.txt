@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ltl3)
+project(omni_fault)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -84,7 +84,7 @@ add_message_files(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES ltl3
+#  LIBRARIES omni_fault
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -101,19 +101,19 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(ltl3
-#   src/${PROJECT_NAME}/ltl3.cpp
+# add_library(omni_fault
+#   src/${PROJECT_NAME}/omni_fault.cpp
 # )
 
 ## Declare a cpp executable
-# add_executable(ltl3_node src/ltl3_node.cpp)
+# add_executable(omni_fault_node src/omni_fault_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(ltl3_node ltl3_generate_messages_cpp)
+# add_dependencies(omni_fault_node omni_fault_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(ltl3_node
+# target_link_libraries(omni_fault_node
 #   ${catkin_LIBRARIES}
 # )
 
@@ -132,7 +132,7 @@ include_directories(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS ltl3 ltl3_node
+# install(TARGETS omni_fault omni_fault_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -157,7 +157,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_ltl3.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_omni_fault.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

@@ -2,9 +2,9 @@
 import roslib
 import numpy
 import Queue
-roslib.load_manifest('ltl3')
+roslib.load_manifest('omni_fault')
 import rospy
-from ltl3.msg import pose, activity, confirmation, knowledge
+from omni_fault.msg import pose, activity, confirmation, knowledge
 from math import sqrt, cos, sin, radians
 import numpy
 from init import *
@@ -134,3 +134,19 @@ if __name__ == '__main__':
         planner_agent(agent_letter)
     except rospy.ROSInterruptException:
         pass
+
+
+#=============================================
+# python planner.py PY
+# when manually send a message to PY
+# rostopic pub -1 knowledge_PY ltl3/knowledge -- 'pyball' 'pyr3'
+# after PY updates plan, it moves to 'pyr3' to execute its action 'pypoint',
+# PY should publish message '['oyball', 'oyr3']' to topic 'knowledge_OY'
+# rostopic pub -1 knowledge_OY ltl3/knowledge -- 'oyball' 'oyr3'
+# then OY would update its plan, and moves to 'oyr3' to execute its action 'oyobsgrasp'
+
+
+#=========================================
+# for testing 
+# rostopic pub -1 activity_done_PY ltl3/confirmation -- '0' 'goto' '10'
+# rostopic pub -1 activity_done_OY ltl3/confirmation -- '0' 'goto' '10'        
