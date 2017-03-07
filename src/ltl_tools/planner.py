@@ -39,15 +39,15 @@ class ltl_planner(object):
                         return 
 		#print '\n'
                 print '------------------------------'
-                print 'the prefix of plan **states**:'
+                print 'the prefix of plan **sequence of states**:'
 		print [n for n in self.run.line]
-                print 'the suffix of plan **states**:'
+                print 'the suffix of plan **sequence of states**:'
 		print [n for n in self.run.loop]
 		#print '\n'
                 print '------------------------------'
-		print 'the prefix of plan **actions**:'
+		print 'the prefix of plan **sequence of actions**:'
 		print [n for n in self.run.pre_plan]
-		print 'the suffix of plan **actions**:'
+		print 'the suffix of plan **sequence of actions**:'
 		print [n for n in self.run.suf_plan]
 		self.opt_log.append((self.Time, self.run.pre_plan, self.run.suf_plan, self.run.precost, self.run.sufcost, self.run.totalcost))
 		self.last_time = self.Time
@@ -98,6 +98,11 @@ class ltl_planner(object):
 			self.next_move = self.run.pre_plan[self.index]
 			print 'Plan adapted!'
 
+	def replan_simple(self):
+		self.product.graph['ts'].graph['region'].set_initial(self.pose)
+		self.product.graph['ts'].build_full()
+		self.product.build_full()
+		self.optimal(10)                        
 
 
 

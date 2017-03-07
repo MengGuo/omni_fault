@@ -1,3 +1,5 @@
+import sys
+
 from ltl_tools.ts import MotionFts, ActionModel, MotActModel
 from ltl_tools.planner import ltl_planner
 
@@ -22,14 +24,14 @@ robot_model=dict()
 # angle discrete
 # [-3.1+3.1415*k/4 for k in range(8)]
 angle_label = {
-    -3.1: set(['W',]),
-    -2.3: set(['SW',]),
-    -1.5: set(['S',]),
-    -0.7: set(['SE',]),
-    0.04: set(['E',]),
-    0.8: set(['NE',]),
-    1.6: set(['N',]),
-    2.3: set(['NW',]),        
+    -3.1: set(['w',]),
+    -2.3: set(['sw',]),
+    -1.5: set(['s',]),
+    -0.7: set(['se',]),
+    0.04: set(['e',]),
+    0.8: set(['ne',]),
+    1.6: set(['n',]),
+    2.3: set(['nw',]),        
 }
 
 
@@ -40,7 +42,7 @@ Y1_wps_label = {
     (2.0, -2.0): set(['y1r2']),
     (0.0, 2.0): set(['y1r3']),    
 }
-Y1_init_pose = ((0.0, 2.0), 'S')
+Y1_init_pose = ((0.0, 2.0), -1.5)
 
 Y1_label, Y1_symbols = combine_wps_angle(Y1_wps_label, angle_label)
 
@@ -50,14 +52,15 @@ Y1_motion.set_initial(Y1_init_pose)
 Y1_edge=[((-2.0, -2.0), (2.0, -2.0)),
          ((2.0, -2.0), (0.0, 2.0)),
          ((0.0, 2.0), (-2.0, -2.0))]
-Y1_motion.add_un_edges(Y1_edge, alpha=1.0) # alpha depends on the mode
+Y1_arg_edge = [((e[0],af), (e[1],at)) for e in Y1_edge for af in angle_label.keys() for at in angle_label.keys()]
+Y1_motion.add_un_edges(Y1_arg_edge, alpha=1.0) # alpha depends on the mode
 ########### Y1 action ##########
 Y1_action_label={
-             'y1act': (10, True, set(['y1act'])),
+             'y1act': (10, '1', set(['y1act'])),
             }
 Y1_action = ActionModel(Y1_action_label)
 ########### Y1 task ############
-Y1_task = '(<> (y1r1 && y1act)) && ([]<> (y1r2 && E)) && ([]<> (y1r3 && W))'
+Y1_task = '(<> (y1r1 && y1act)) && ([]<> (y1r2 && e)) && ([]<> (y1r3 && w))'
 ########### Y1 initialize ############
 robot_model['Y1']=(Y1_motion, Y1_action, Y1_task)
 

@@ -1,2 +1,0 @@
-string object
-string region
