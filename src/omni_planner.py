@@ -52,6 +52,7 @@ def decision_callback(data):
     dec_data = [data.f_agent, data.t_agent, data.chosen]
     print 'Decision data received from Agent %s to Agent %s with content %s' %(str(dec_data[0]), str(dec_data[1]), str(bec_data[2]))
 
+    
 #----------------------------------------
 # main planner starts here
 #----------------------------------------
@@ -64,6 +65,13 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
     global req_data
     global bid_data
     global dec_data
+    # initialization
+    c = 0
+    confirm = [0, None, None]
+    op_mode = 'normal'
+    req_data = [None, None]
+    bid_data = [None, None, None, None]    
+    dec_data = [None, None, None]
     rospy.init_node('omni_planner_%s' %letter)
     print 'Agent %s: omni_planner started!' %(letter)
     ###### publish to
@@ -78,9 +86,8 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
     rospy.Subscriber('collab_reply' %letter, bid, bid_callback)
     rospy.Subscriber('collab_decide' %letter, decision, decision_callback)
     ####### agent information
-    c = 0
     k = 0
-    flag = 0
+    flag = False
     current_mode = 'normal'
     current_alpha = mode_alpha['normal']
     full_model = MotActModel(ts, act)
@@ -107,7 +114,7 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
                 print 'Agent %s: plan updated' %str(letter)
             else:
                 # type-III
-                print 'Agent %s in Type-III mode, stopped moving' %str(letter)
+                print 'Agent %s in type-III mode, stopped moving' %str(letter)
                 req_msg = task()
                 req_msg.f_agent = letter
                 req_msg.task = task_formula
@@ -124,7 +131,40 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
                         bid_answer[f_agent] = (cost, dist)
                 print 'bid_answer received: %s' %str(bid_answer)
                 # decide
-                
+                min_dist = min([v[1] for l,v in bid_answer.items()])
+                min_dist_agent = [l for l,v in bid_answer.items() if v[1] == min_dist]
+                chosen_agent = min(min_dist_agent, key= lambda l: bid_answer[l][0])
+                print 'chosen agent for collaboration: %s' %str(chosen_agent)
+                # send decision back
+                for f_agent in bid_answer.items():
+                    dec_msg = decision()
+                    dec_msg.f_agent = letter
+                    dec_msg.t_agent = f_agent
+                    if f_agent == chosen_agent:
+                        dec_msg.chosen = 1
+                    else:
+                        dec_msg.chosen = 0
+                    collab_decide_pub.publish(dec_msg)
+                print 'decision for collaboration sent!'
+            ###############  answer to collaboration request
+            (f_agent, task) = req_data
+            if f_agent and (op_mode != 'type-III'):
+                print 'collaboration request received from %s for task %s' %(str(f_agent), str(task))
+                c_cost, c_dist = omni_planner.evaluate_request(task)
+                bid_msg = bid()
+                bid_msg.f_agent = letter
+                bid_msg.t_agent = f_agent
+                bid_msg.cost = c_cost
+                bid_msg.dist = c_dist
+                collab_reply_pub.publish(bid_msg)
+                start = time.time()
+                max_wait_time = 10 # seconds
+                while (time.time()-start < max_wait_time):
+                    (c_f_agent, c_t_agent, c_chosen) = dec_data
+                    if (c_f_agent == f_agent) and (c_t_agent == letter) and (c_chosen == 1):
+                        print 'agent %s chosen for collaboration' %str(c_t_agent)
+                        omni_planner.confirm_request(task)
+        #----------------------------------------
         ############### send next move
         next_move = omni_planner.next_move
         next_state = omni_planner.next_state
@@ -133,34 +173,28 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
             # next activity is action
             next_activity.header = header
             next_activity.type = next_move
-            next_activity.x = -0.76
-            next_activity.y = 0.30
+            next_activity.x = 0.0
+            next_activity.y = 0.0
             print 'Agent %s: next action %s!' %(letter, next_activity.type)
-            while not ((confirm[0]==next_move) and (confirm[1]>0) and confirm[2] == header):
+            while not ((confirm[0] == header) and (confirm[1]==next_move) and (confirm[2]>0)):
                 activity_pub.publish(next_activity)
                 rospy.sleep(0.06)
             rospy.sleep(1)
-            confirm[1] = 0
+            confirm[2] = 0
             header = header + 1
             print 'Agent %s: action %s done!' %(letter, next_activity.type)
         else:
             print 'Agent %s: next waypoint (%.2f,%.2f,%.2f)!' %(letter, next_move[0], next_move[1], next_move[2])
-            while not ((confirm[0]=='goto') and (confirm[1]>0) and confirm[2] == header):
-                #relative_x = next_move[0]-POSE[0]
-                #relative_y = next_move[1]-POSE[1]
-                #relative_pose = [relative_x, relative_y]
-                #oriented_relative_pose = rotate_2d_vector(relative_pose, -POSE[2])
+            while not ((confirm[0] == header) and (confirm[1]=='goto') and (confirm[2]>0)):
                 next_activity.type = 'goto'
                 next_activity.header = header
-                #next_activity.x = oriented_relative_pose[0]
-                #next_activity.y = oriented_relative_pose[1]
-                next_activity.x = next_move[0]
-                next_activity.y = next_move[1]
-                next_activity.psi = next_move[2]
+                next_activity.x = next_move[0][0]
+                next_activity.y = next_move[0][1]
+                next_activity.psi = next_move[1]
                 activity_pub.publish(next_activity)
                 rospy.sleep(0.06)
             rospy.sleep(1)
-            confirm[1] = 0
+            confirm[2] = 0
             header = header + 1
             print 'Agent %s: waypoint (%.2f,%.2f,%.2f) reached!' %(letter, next_move[0], next_move[1], next_move[2])
             omni_planner.pose = [next_move[0], next_move[1]]

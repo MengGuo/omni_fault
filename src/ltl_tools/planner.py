@@ -8,6 +8,8 @@ from discrete_plan import dijkstra_plan_networkX, dijkstra_plan_optimal, improve
 class ltl_planner(object):
 	def __init__(self, ts, hard_spec, soft_spec):
 		buchi = mission_to_buchi(hard_spec, soft_spec)
+                self.hard_spec = hard_spec
+                self.ts = ts
 		self.product = ProdAut(ts, buchi)
 		self.Time = 0
 		self.cur_pose = None
@@ -102,8 +104,29 @@ class ltl_planner(object):
 		self.product.graph['ts'].graph['region'].set_initial(self.pose)
 		self.product.graph['ts'].build_full()
 		self.product.build_full()
-		self.optimal(10)                        
+		self.optimal(10)
 
+        def evaluate_request(self, task):
+                test_buchi = mission_to_buchi(self.hard_spec, task)
+                test_product = ProdAut(self.ts, test_buchi)
+                test_product.build_full()
+                test_run, test_time = dijkstra_plan_networkX(test_product, self.beta)
+                test_edges = test_run.prod_run_to_prod_edges(test_product)
+                total_c = 0
+                total_d = 0
+                for e in test_run.pre_prod_edges:
+                        total_c += test_product.edge[e[0]][e[1]]['c_weight']
+                        total_d += test_product.edge[e[0]][e[1]]['d_weight']
+                for e in test_run.suf_prod_edges:
+                        total_c += self.beta*test_product.edge[e[0]][e[1]]['c_weight']
+                        total_d += self.beta*test_product.edge[e[0]][e[1]]['d_weight']
+                return total_c, total_d
+
+        def confirm_request(self, task):
+                self.__init__(self.ts, hard_spec, task)
+                self.product_build_full()
+                self.optimal(10)
+                
 
 
 

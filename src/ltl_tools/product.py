@@ -24,7 +24,7 @@ class ProdAut(DiGraph):
 							total_weight = cost + self.graph['alpha']*dist
                                                         #print 'label,truth,total_weight', label,truth,total_weight
 							if truth:
-								self.add_edge(f_prod_node, t_prod_node, weight=total_weight)
+								self.add_edge(f_prod_node, t_prod_node, weight=total_weight, c_weight=cost, d_weight=dist)
                                                                 #print 'add edge', (f_prod_node, t_prod_node)
 
 	def composition(self, ts_node, buchi_node):

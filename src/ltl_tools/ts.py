@@ -55,7 +55,7 @@ class MotionFts(DiGraph):
 
     def update_by_alpha(self, new_alpha):
         for f_node,t_node in self.edges_iter():
-            cost = distance(f_node, t_node, alpha)
+            cost = distance(f_node, t_node, new_alpha)
             self.edge[f_node][t_node]['weight'] = cost
         print 'Edge cost updated due to new alpha'
 
