@@ -1,3 +1,3 @@
 string f_agent
 string t_agent
-bool chosen 
+int8 chosen 

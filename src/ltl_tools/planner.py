@@ -60,21 +60,21 @@ class ltl_planner(object):
 		return plantime
 
 	def find_next_move(self):
-		if self.segment == 'line' and self.index < len(self.run.pre_plan)-1:
+		if self.segment == 'line' and self.index < len(self.run.pre_plan)-2:
 			self.trace.append(self.run.line[self.index])
 			self.index += 1
 			self.next_move = self.run.pre_plan[self.index]
-		elif self.segment == 'line' and self.index == len(self.run.pre_plan)-1:
+		elif self.segment == 'line' and self.index == len(self.run.pre_plan)-2:
 			self.trace.append(self.run.line[self.index])
 			self.index = 0
 			self.segment = 'loop'
 			self.next_move = self.run.suf_plan[self.index]
-		elif self.segment == 'loop' and self.index < len(self.run.suf_plan)-1:
+		elif self.segment == 'loop' and self.index < len(self.run.suf_plan)-2:
 			self.trace.append(self.run.loop[self.index])
 			self.index += 1
 			self.segment = 'loop'
 			self.next_move = self.run.suf_plan[self.index]
-		elif self.segment == 'loop' and self.index == len(self.run.suf_plan)-1:
+		elif self.segment == 'loop' and self.index == len(self.run.suf_plan)-2:
 			self.trace.append(self.run.loop[self.index])
 			self.index = 0
 			self.segment = 'loop'
@@ -90,6 +90,12 @@ class ltl_planner(object):
 		changes = MotionFts.update_after_region_change(sense_info,None)
 		if changes:
 			return True
+                        
+        def update_by_alpha(self, new_alpha):
+                self.product.graph['ts'].graph['region'].update_by_alpha(new_alpha)
+                self.product.graph['ts'].build_full()
+		self.product.build_full()
+		self.optimal(10)
 
 	def replan(self):
 		new_run = improve_plan_given_history(self.product, self.trace)

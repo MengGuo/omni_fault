@@ -50,7 +50,7 @@ add_message_files(
    activity.msg
    confirmation.msg
    pose.msg
-   task.msg
+   request.msg
    status.msg
    bid.msg
    decision.msg

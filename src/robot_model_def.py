@@ -62,7 +62,8 @@ Y1_action = ActionModel(Y1_action_label)
 ########### Y1 task ############
 Y1_task = '(<> (y1r1 && y1act)) && ([]<> (y1r2 && e)) && ([]<> (y1r3 && w))'
 ########### Y1 initialize ############
-robot_model['Y1']=(Y1_motion, Y1_action, Y1_task)
+Y1_mode_alpha = {'normal': 1.0, 'type-I': 2.0, 'type-III': 4.0}
+robot_model['Y1']=(Y1_motion, Y1_action, Y1_task, Y1_mode_alpha)
 
 
 
