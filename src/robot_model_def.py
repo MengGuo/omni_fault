@@ -54,26 +54,21 @@ node_label = {
     (6.0, 5.0): set(['h4',]),            
 }
 
-forbid_edges 
-# -------------------- Y1 model --------------------
+forbid_edges = None
 
-Y1_wps_label = {
-    (-2.0, -2.0): set(['y1r1']),
-    (2.0, -2.0): set(['y1r2']),
-    (0.0, 2.0): set(['y1r3']),    
-}
-Y1_init_pose = ((0.0, 2.0), -1.5)
+comb_nodes, symbols = combine_wps_angle(node_label, angle_label)
 
-Y1_label, Y1_symbols = combine_wps_angle(Y1_wps_label, angle_label)
+# -------------------- YoBot 1 model --------------------
+
+Y1_init_pose = ((5.0, 6.0), -1.5)
+Y1_alpha = [1.0, 1.0] # alpha depends on the mode
+
+Y1_label, Y1_symbols = 
 
 Y1_motion = MotionFts(Y1_label, Y1_symbols, 'Y1-workspace')
 Y1_motion.set_initial(Y1_init_pose)
 
-Y1_edge=[((-2.0, -2.0), (2.0, -2.0)),
-         ((2.0, -2.0), (0.0, 2.0)),
-         ((0.0, 2.0), (-2.0, -2.0))]
-Y1_arg_edge = [((e[0],af), (e[1],at)) for e in Y1_edge for af in angle_label.keys() for at in angle_label.keys()]
-Y1_motion.add_un_edges(Y1_arg_edge, alpha=1.0) # alpha depends on the mode
+Y1_motion.add_edges(forbid_edges, Y1_alpha) 
 ########### Y1 action ##########
 Y1_action_label={
              'y1act': (10, '1', set(['y1act'])),

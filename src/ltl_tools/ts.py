@@ -5,12 +5,12 @@ from boolean_formulas.parser import parse as parse_guard
 from math import sqrt
 from networkx.classes.digraph import DiGraph
 
-def distance(node1, node2, alpha=1):
+def distance(node1, node2, alpha):
     pose1, ang1 = node1
     pose2, ang2 = node2
     wp_dif = (sqrt((pose1[0]-pose2[0])**2+(pose1[1]-pose2[1])**2)+0.001)
     ang_dif = abs(ang1-ang2)
-    return wp_dif+alpha*ang_dif
+    return alpha[0]*wp_dif+alpha[1]*ang_dif
 
 def reach_waypoint(pose, waypoint, margin):
     if distance(pose, waypoint)<=margin:
@@ -25,24 +25,14 @@ class MotionFts(DiGraph):
             self.add_node(n, label=label, status='confirmed')
         self.alpha = 1
             
-    def add_un_edges(self, edge_list, alpha=1):
+    def add_un_edges(self, forbid_edges, alpha=[1.0,1.0]):
         self.alpha = alpha
-        for edge in edge_list:            
-            f_node = edge[0]
-            t_node = edge[1]
-            cost = distance(f_node, t_node, alpha)
-            self.add_edge(f_node, t_node, weight=cost)
-            # can be modified to be directed
-            self.add_edge(t_node, f_node, weight=cost)
-        for node in self.nodes_iter():
-            self.add_edge(node, node, weight=0.01)
-
-    def add_full_edges(self, alpha=1):
         for f_node in self.nodes_iter():
             for t_node in self.nodes_iter():
-                cost = distance(f_node, t_node, alpha)
-                if (f_node, t_node) not in self.edges():
-                    self.add_edge(f_node, t_node, weight=cost)
+                if (f_node, t_node) not in forbid_edges:
+                    self.add_edge(f_node, t_node, weight=distance(f_node, t_node, alpha))
+        for node in self.nodes_iter():
+            self.add_edge(node, node, weight=0.01)
 
     def set_initial(self, state):
         init_node = self.closest_node(state)
@@ -58,7 +48,6 @@ class MotionFts(DiGraph):
             cost = distance(f_node, t_node, new_alpha)
             self.edge[f_node][t_node]['weight'] = cost
         print 'Region FTS edge cost updated due to new alpha'
-
 
         
 class ActionModel(object):
