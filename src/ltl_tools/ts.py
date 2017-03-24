@@ -23,9 +23,9 @@ class MotionFts(DiGraph):
         DiGraph.__init__(self, symbols=symbols, type=ts_type, initial=set())
         for (n, label) in node_dict.iteritems():
             self.add_node(n, label=label, status='confirmed')
-        self.alpha = 1
+        self.alpha = [1.0, 1.0]
             
-    def add_un_edges(self, forbid_edges, alpha=[1.0,1.0]):
+    def add_edges(self, forbid_edges, alpha=[1.0,1.0]):
         self.alpha = alpha
         for f_node in self.nodes_iter():
             for t_node in self.nodes_iter():
@@ -107,6 +107,7 @@ class MotActModel(DiGraph):
                         reg_to[2] = 1
                     if (act_to == 'unload_a') or (act_to == 'unload_b'):
                         reg_to[2] = 0
+                    reg_to = tuple(reg_to)
                     #----------
                     prod_node_to = self.composition(reg_to, act_to)
                     self.add_edge(prod_node, prod_node_to, weight=self.graph['action'].action[act_to][0], label= act_to, marker= 'visited')
@@ -114,6 +115,7 @@ class MotActModel(DiGraph):
                 for reg_to in self.graph['region'].successors_iter(reg):
                     prod_node_to = self.composition(reg_to, 'None')
                     self.add_edge(prod_node, prod_node_to, weight=self.graph['region'][reg][reg_to]['weight'], label= 'goto', marker= 'visited')
+        print 'full_model constructed with %d states and %s transitions' %(len(self.nodes()), len(self.edges())) 
     
     def fly_successors_iter(self, prod_node): 
         reg, act = self.projection(prod_node)

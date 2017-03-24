@@ -19,6 +19,7 @@ def buchi_from_ltl(formula,Type):
         guard_formula = edges[(ef,et)]
         guard_expr = parse_guard(guard_formula)
         buchi.add_edge(ef, et, guard=guard_expr, guard_formula=guard_formula)
+    print 'BA constructed with %d nodes and %d edges' %(len(buchi.nodes()), len(buchi.edges()))        
     return buchi
 
 def mission_to_buchi(hard_spec, soft_spec):
@@ -68,6 +69,7 @@ def DuoBA_from_ltls(hard_spec, soft_spec):
                 (f_s_node in DuoBA.graph['soft'].graph['accept'] and 
                 f_level == 2 and t_level == 1)):
                 DuoBA.add_edge(f_duonode, t_duonode, hardguard=hardguard, softguard=softguard)
+    print 'DuoBA constructed with %d nodes and %d edges' %(len(DuoBA.nodes()), len(DuoBA.edges()))
     return DuoBA
 
 def check_duo_attr(DuoBA, node):

@@ -4,7 +4,7 @@ from ltl_tools.ts import MotionFts, ActionModel, MotActModel
 from ltl_tools.planner import ltl_planner
 
 
-def combine_wps_angle(wps_label, angle_label):
+def combine_wps_angle(wps_label, angle_label, obj_label):
     nodes_label = dict()
     symbols = set()
     for wp, wp_l in wps_label.iteritems():
@@ -64,7 +64,7 @@ obj_label = {
 
 comb_nodes, symbols = combine_wps_angle(node_label, angle_label, obj_label)
 
-forbid_edges = None
+forbid_edges = []
 # -------------------- YoBot 1 model --------------------
 
 # pose = ((x,y), theta, obj)
@@ -101,7 +101,7 @@ if __name__ == '__main__':
         agent_name = str(sys.argv[1])
     ###############
     if agent_name in robot_model:
-        ts, act, task = robot_model[agent_name]
+        ts, act, task, mode_alpha = robot_model[agent_name]
         full_model = MotActModel(ts, act)
         planner = ltl_planner(full_model, task, None)
         ####### initial plan synthesis

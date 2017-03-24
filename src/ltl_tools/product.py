@@ -26,6 +26,7 @@ class ProdAut(DiGraph):
 							if truth:
 								self.add_edge(f_prod_node, t_prod_node, weight=total_weight, c_weight=cost, d_weight=dist)
                                                                 #print 'add edge', (f_prod_node, t_prod_node)
+                print 'product constructed with %d nodes and %d edges' %(len(self.nodes()), len(self.edges()))
 
 	def composition(self, ts_node, buchi_node):
 		prod_node = (ts_node, buchi_node)
