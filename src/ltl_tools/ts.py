@@ -101,7 +101,14 @@ class MotActModel(DiGraph):
                 # actions 
                 label = self.graph['region'].node[reg]['label']
                 for act_to in self.graph['action'].allowed_actions(label):
-                    prod_node_to = self.composition(reg, act_to)
+                    #----------
+                    reg_to = list(reg)
+                    if (act_to == 'load_a') or (act_to == 'load_b'):
+                        reg_to[2] = 1
+                    if (act_to == 'unload_a') or (act_to == 'unload_b'):
+                        reg_to[2] = 0
+                    #----------
+                    prod_node_to = self.composition(reg_to, act_to)
                     self.add_edge(prod_node, prod_node_to, weight=self.graph['action'].action[act_to][0], label= act_to, marker= 'visited')
                 # motions
                 for reg_to in self.graph['region'].successors_iter(reg):
