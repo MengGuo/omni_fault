@@ -4,6 +4,8 @@ from ltl_tools.ts import MotionFts, ActionModel, MotActModel
 from ltl_tools.planner import ltl_planner
 
 
+from math import pi as PI
+
 def combine_wps_angle(wps_label, angle_label, obj_label):
     nodes_label = dict()
     symbols = set()
@@ -23,17 +25,26 @@ def combine_wps_angle(wps_label, angle_label, obj_label):
 robot_model=dict()
 
 # angle discrete
-# [-3.1+3.1415*k/4 for k in range(8)]
+# # [-3.1+3.1415*k/4 for k in range(8)]
+# angle_label = {
+#     -3.1: set(['w',]),
+#     -2.3: set(['sw',]),
+#     -1.5: set(['s',]),
+#     -0.7: set(['se',]),
+#     0.04: set(['e',]),
+#     0.8: set(['ne',]),
+#     1.6: set(['n',]),
+#     2.3: set(['nw',]),        
+# }
+
 angle_label = {
-    -3.1: set(['w',]),
-    -2.3: set(['sw',]),
-    -1.5: set(['s',]),
-    -0.7: set(['se',]),
-    0.04: set(['e',]),
-    0.8: set(['ne',]),
-    1.6: set(['n',]),
-    2.3: set(['nw',]),        
+    -PI: set(['w',]),
+    -PI*0.5: set(['s',]),
+    0.0: set(['e',]),
+    PI*0.5: set(['n',]),
 }
+
+
 
 # la = 'place to load object a'
 # ua = 'place to unload object a'
@@ -64,7 +75,9 @@ obj_label = {
 
 comb_nodes, symbols = combine_wps_angle(node_label, angle_label, obj_label)
 
-forbid_edges = []
+f_edges1 = ((3.0,1.0), (4.0,1.0), (5.0,1.0))
+f_edges2 = ((1.0,3.0), (1.0,4.0), (1.0,5.0))
+forbid_edges = [(e1,e2) for e1 in f_edges1 for e2 in f_edges1] + [(e1,e2) for e1 in f_edges2 for e2 in f_edges2]
 # -------------------- YoBot 1 model --------------------
 
 # pose = ((x,y), theta, obj)

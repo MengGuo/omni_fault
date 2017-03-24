@@ -7,6 +7,8 @@ from discrete_plan import dijkstra_plan_networkX, dijkstra_plan_optimal, improve
 
 class ltl_planner(object):
 	def __init__(self, ts, hard_spec, soft_spec):
+                print '===================='
+                print 'planner initialized'
 		buchi = mission_to_buchi(hard_spec, soft_spec)
                 self.hard_spec = hard_spec
                 self.ts = ts
