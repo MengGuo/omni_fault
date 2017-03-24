@@ -53,12 +53,12 @@ node_label = {
     (2.0, 1.0): set(['ub1',]),        
     (3.0, 1.0): set(['la1',]),
     (4.0, 1.0): set(['la2',]),
-    (5.0, 1.0): set(['la3',]),
+#    (5.0, 1.0): set(['la3',]),
     (6.0, 1.0): set(['ub2',]),    
     (1.0, 2.0): set(['ua1',]),
     (1.0, 3.0): set(['lb1',]),
     (1.0, 4.0): set(['lb2',]),
-    (1.0, 5.0): set(['lb3',]),
+#    (1.0, 5.0): set(['lb3',]),
     (1.0, 2.0): set(['ua2',]),
     (5.0, 6.0): set(['h1',]),
     (6.0, 6.0): set(['h2',]),
@@ -77,11 +77,12 @@ comb_nodes, symbols = combine_wps_angle(node_label, angle_label, obj_label)
 
 f_edges1 = ((3.0,1.0), (4.0,1.0), (5.0,1.0))
 f_edges2 = ((1.0,3.0), (1.0,4.0), (1.0,5.0))
-forbid_edges = [(e1,e2) for e1 in f_edges1 for e2 in f_edges1] + [(e1,e2) for e1 in f_edges2 for e2 in f_edges2]
+f_edges3 = ((5.0,6.0), (6.0,6.0),(6.0,5.0),(5.0,5.0))
+forbid_edges = [(e1,e2) for e1 in f_edges1 for e2 in f_edges1] + [(e1,e2) for e1 in f_edges2 for e2 in f_edges2] + [(e1,e2) for e1 in f_edges3 for e2 in f_edges3]
 # -------------------- YoBot 1 model --------------------
 
 # pose = ((x,y), theta, obj)
-Y1_init_pose = ((5.0, 6.0), -1.5, 0)
+Y1_init_pose = ((5.0, 6.0), -PI*0.5, 0)
 Y1_alpha = [1.0, 1.0] # alpha depends on the mode
 
 Y1_motion = MotionFts(comb_nodes, symbols, 'Y1-workspace')
@@ -90,15 +91,15 @@ Y1_motion.add_edges(forbid_edges, Y1_alpha)
 
 ########### Y1 action ##########
 Y1_action_label={
-    'load_a': (10, 'nobj', set(['loada'])),
+    'load_a': (10, '(la1 || la2) && nobj', set(['loada'])),
     'unload_a': (10, 'obj', set(['unloada'])),
-    'load_b': (10, 'nobj', set(['loadb'])),
+    'load_b': (10, '(lb1 || lb2) && nobj', set(['loadb'])),
     'unload_b': (10, 'obj', set(['unloadb'])),    
             }
 Y1_action = ActionModel(Y1_action_label)
 ########### Y1 task ############
-one_la = 'la1 || la2 || la3'
-one_ua = 'ua1 || ua2 || ua3'
+one_la = 'la1 || la2'
+one_ua = 'ua1 || ua2'
 Y1_task = '[] <> ((%s && loada) && <> (%s && unloada)) && [] <> h1' %(one_la, one_ua)
 ########### Y1 initialize ############
 Y1_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-III': [0.1, 10.0]}
