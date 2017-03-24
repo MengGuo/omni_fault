@@ -9,10 +9,11 @@ def combine_wps_angle(wps_label, angle_label):
     symbols = set()
     for wp, wp_l in wps_label.iteritems():
         for angle, angle_l in angle_label.iteritems():
-            node = (wp, angle)
-            node_l = wp_l.union(angle_l)
-            nodes_label[node] = node_l
-            symbols.update(node_l)
+            for obj, obj_l in obj_label.iteritems():
+                node = (wp, angle, obj)
+                node_l = wp_l.union(angle_l.union(obj_l))
+                nodes_label[node] = node_l
+                symbols.update(node_l)
     return nodes_label, symbols
 
 
@@ -34,8 +35,8 @@ angle_label = {
     2.3: set(['nw',]),        
 }
 
-# la = 'load object a'
-# ua = 'unload object a'
+# la = 'place to load object a'
+# ua = 'place to unload object a'
 # h = 'home base'
 node_label = {
     (2.0, 1.0): set(['ub1',]),        
@@ -54,30 +55,40 @@ node_label = {
     (6.0, 5.0): set(['h4',]),            
 }
 
+# nobj = 'no obj'
+# obj = 'has obj'
+obj_label = {
+    0: set(['nobj',]),
+    1: set(['obj',]),
+}
+
+comb_nodes, symbols = combine_wps_angle(node_label, angle_label, obj_label)
+
 forbid_edges = None
-
-comb_nodes, symbols = combine_wps_angle(node_label, angle_label)
-
 # -------------------- YoBot 1 model --------------------
 
-Y1_init_pose = ((5.0, 6.0), -1.5)
+# pose = ((x,y), theta, obj)
+Y1_init_pose = ((5.0, 6.0), -1.5, 0)
 Y1_alpha = [1.0, 1.0] # alpha depends on the mode
 
-Y1_label, Y1_symbols = 
-
-Y1_motion = MotionFts(Y1_label, Y1_symbols, 'Y1-workspace')
+Y1_motion = MotionFts(comb_nodes, symbols, 'Y1-workspace')
 Y1_motion.set_initial(Y1_init_pose)
+Y1_motion.add_edges(forbid_edges, Y1_alpha)
 
-Y1_motion.add_edges(forbid_edges, Y1_alpha) 
 ########### Y1 action ##########
 Y1_action_label={
-             'y1act': (10, '1', set(['y1act'])),
+    'load_a': (10, 'nobj', set(['loada'])),
+    'unload_a': (10, 'obj', set(['unloada'])),
+    'load_b': (10, 'nobj', set(['loadb'])),
+    'unload_b': (10, 'obj', set(['unloadb'])),    
             }
 Y1_action = ActionModel(Y1_action_label)
 ########### Y1 task ############
-Y1_task = '(<> (y1r1 && y1act)) && ([]<> (y1r2 && e)) && ([]<> (y1r3 && w))'
+one_la = 'la1 || la2 || la3'
+one_ua = 'ua1 || ua2 || ua3'
+Y1_task = '[] <> ((%s && loada) && <> (%s && unloada)) && [] <> h1' %(one_la, one_ua)
 ########### Y1 initialize ############
-Y1_mode_alpha = {'normal': 1.0, 'type-I': 2.0, 'type-III': 4.0}
+Y1_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-III': [0.1, 10.0]}
 robot_model['Y1']=(Y1_motion, Y1_action, Y1_task, Y1_mode_alpha)
 
 

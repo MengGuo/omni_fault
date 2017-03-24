@@ -6,8 +6,8 @@ from math import sqrt
 from networkx.classes.digraph import DiGraph
 
 def distance(node1, node2, alpha):
-    pose1, ang1 = node1
-    pose2, ang2 = node2
+    pose1, ang1 = node1[0:2]
+    pose2, ang2 = node2[0:2]
     wp_dif = (sqrt((pose1[0]-pose2[0])**2+(pose1[1]-pose2[1])**2)+0.001)
     ang_dif = abs(ang1-ang2)
     return alpha[0]*wp_dif+alpha[1]*ang_dif
