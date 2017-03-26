@@ -1,7 +1,7 @@
 # Motion and Task Planning for Omni-Directional Ground Vehicles
 
 ## Single vehicle test
-The robot is assigned a task to __ **infinitely often** load object *a* (either at region `la1` with orientation `west` or at region `la2` with orientation `east`), then unload it (either at region `ua1` with orientation `south` or at region `ua2` with orientation `north`) and visit its base `h1`, and which is specified as the LTL formula:
+The robot is assigned a task to __ **infinitely often** load object *a* (either at region `la1` with orientation `west` or at region `la2` with orientation `east`), then unload it (either at region `ua1` with orientation `south` or at region `ua2` with orientation `north`) and visit its base `h1`__, and which is specified as the LTL formula:
 ```python
 one_la = '(la1 && w) || (la2 && e)'
 one_ua = '(ua1 && s)|| (ua2 && n)'
