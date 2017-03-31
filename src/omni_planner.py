@@ -88,8 +88,10 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
         ###############  reconfiguration due to self operation mode change
         print '------------------------------'
         if op_mode != current_mode:
-            current_mode = op_mode
+            print '**********'
             print 'Agent %s: Operation mode changed from %s to %s' %(str(letter), str(current_mode), str(op_mode))
+            print '**********'
+            current_mode = op_mode
             # normal, type-I, type-II
             if op_mode in ['normal', 'type-I', 'type-II']:
                 if op_mode in mode_alpha:

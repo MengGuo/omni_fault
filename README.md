@@ -5,7 +5,7 @@ The robot is assigned a task to **infinitely often** load object *a* (either at 
 ```python
 one_la = '(la1 && w) || (la2 && e)'
 one_ua = '(ua1 && s)|| (ua2 && n)'
-Y1_task = '[] <> ((%s && loada) && <> (%s && unloada)) && [] <> (h1 && e)' %(one_la, one_ua)
+Y1_task = '[] <> ((%s &&ts loada) && <> (%s && unloada)) && [] <> (h1 && e)' %(one_la, one_ua)
 ```
 
 - Initialize robot model in robot_model_def.py

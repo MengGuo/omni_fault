@@ -103,7 +103,7 @@ class MotActModel(DiGraph):
                 # actions 
                 label = self.graph['region'].node[reg]['label']
                 for act_to in self.graph['action'].allowed_actions(label):
-                    prod_node_to = self.composition(reg_to, act_to)
+                    prod_node_to = self.composition(reg, act_to)
                     self.add_edge(prod_node, prod_node_to, weight=self.graph['action'].action[act_to][0], label= act_to, marker= 'visited')
                 # motions
                 for reg_to in self.graph['region'].successors_iter(reg):
