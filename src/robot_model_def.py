@@ -38,10 +38,10 @@ robot_model = dict()
 # }
 
 angle_label = {
-    -PI: set(['w',]),
-    -PI*0.5: set(['s',]),
+    -3.14: set(['w',]),
+    -1.57: set(['s',]),
     0.0: set(['e',]),
-    PI*0.5: set(['n',]),
+    1.57: set(['n',]),
 }
 
 
@@ -93,7 +93,7 @@ one_la = '(la1 && w) || (la2 && e)'
 one_ua = '(ua1 && s)|| (ua2 && n)'
 Y1_task = '[] <> ((%s && loada) && <> (%s && unloada)) && [] <> (h1 && e)' %(one_la, one_ua)
 ########### Y1 initialize ############
-Y1_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-III': [0.1, 10.0]}
+Y1_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-II': [0.1, 10.0]}
 robot_model['Y1']=(Y1_motion, Y1_action, Y1_task, Y1_mode_alpha)
 
 
@@ -112,7 +112,7 @@ one_la = '(la1 && w) || (la2 && e)'
 one_ua = '(ua1 && s)|| (ua2 && n)'
 Y2_task = '[] <> ((%s && loada) && <> (%s && unloada)) && [] <> (h2 && e)' %(one_la, one_ua)
 ########### Y2 initialize ############
-Y2_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-III': [0.1, 10.0]}
+Y2_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-II': [0.1, 10.0]}
 robot_model['Y2']=(Y2_motion, Y2_action, Y2_task, Y2_mode_alpha)
 
 
@@ -131,7 +131,7 @@ one_lb = '(lb1 && w) || (lb2 && e)'
 one_ub = '(ub1 && s)|| (ub2 && n)'
 Y3_task = '[] <> ((%s && loadb) && <> (%s && unloadb)) && [] <> (h3 && e)' %(one_lb, one_ub)
 ########### Y3 initialize ############
-Y3_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-III': [0.1, 10.0]}
+Y3_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-II': [0.1, 10.0]}
 robot_model['Y3']=(Y3_motion, Y3_action, Y3_task, Y3_mode_alpha)
 
 
@@ -150,7 +150,7 @@ one_lb = '(lb1 && w) || (lb2 && e)'
 one_ub = '(ub1 && s)|| (ub2 && n)'
 Y4_task = '[] <> ((%s && loadb) && <> (%s && unloadb)) && [] <> (h3 && e)' %(one_lb, one_ub)
 ########### Y4 initialize ############
-Y4_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-III': [0.1, 10.0]}
+Y4_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-II': [0.1, 10.0]}
 robot_model['Y4']=(Y4_motion, Y4_action, Y4_task, Y4_mode_alpha)
 
 

@@ -25,7 +25,7 @@ rostopic pub -1 activity_done_Y1 omni_fault/confirmation -- '1' 'y1act' '1'
 ```
 rostopic pub -1  status_Y1 omni_fault/status -- 'type-II'
 ```
-  Then you will see that the discrete plan has been updated due to the cost update in the underlying transition system. 
+  Then once the robot the current motion or action is confirmed (you could do it manually like above), you will see that the discrete plan has been updated due to the cost update in the underlying transition system. 
 
 ## Collaboration between multiple vehicles
 
@@ -43,4 +43,8 @@ python omni_planner.py Y4
 ```
 rostopic pub -1  status_Y2 omni_fault/status -- 'type-III'
 ```
-  Then you will see the request and reply messages exchanged among the robots to negotiate which robot will share the task for `Y2`.
+  Then you will see the request and reply messages exchanged among the robots to negotiate which robot will share the task for `Y2`. Once the other robots accomplish their current motion or action (you could do it manually), then the task of `Y2` will be assigned to one robot, depending on the reply messages. 
+
+
+## Scenario description
+

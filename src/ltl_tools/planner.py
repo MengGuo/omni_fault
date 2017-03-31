@@ -93,12 +93,10 @@ class ltl_planner(object):
 		if changes:
 			return True
                         
-        def update_by_alpha(self, new_alpha):
+        def update_model_by_alpha(self, new_alpha):
                 self.product.graph['ts'].graph['region'].update_by_alpha(new_alpha)
-                self.product.graph['ts'].build_full()
-		self.product.build_full()
-		self.optimal(10)
-
+                self.product.graph['ts'].graph['region'].set_initial(self.cur_pose)
+                
 	def replan(self):
 		new_run = improve_plan_given_history(self.product, self.trace)
 		if (new_run) and (new_run.pre_plan !=self.run.pre_plan[self.index:-1]):
@@ -109,9 +107,7 @@ class ltl_planner(object):
 			print 'Plan adapted!'
 
 	def replan_simple(self):
-		self.product.graph['ts'].graph['region'].set_initial(self.pose)
-		self.product.graph['ts'].build_full()
-		self.product.build_full()
+		#self.product.graph['ts'].graph['region'].set_initial(self.cur_pose)
 		self.optimal(10)
 
         def evaluate_request(self, task):
