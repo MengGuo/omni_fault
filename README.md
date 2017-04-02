@@ -48,3 +48,10 @@ rostopic pub -1  status_Y2 omni_fault/status -- 'type-III'
 
 ## Scenario description
 
+Four robots (`Y1`, `Y2`, `Y3`, `Y4`) start from two home bases (`h1`, `h2`): 
+
+- two of them are assigned to loard object `a` from any of the loading stations (`la1`, `la2`) with a certain orientation (`w`, `e`, `n`, `s`), and then unload `a` to the unloading station (`ua`) with a certain orientation, and then return to its base to charge. This procedure is repeated infinitely often.
+
+- the other two are assigned to loard object `b` from any of the loading stations (`lb1`, `lb2`) with a certain orientation (`w`, `e`, `n`, `s`), and then unload `b` to the unloading station (`ub`) with a certain orientation, and then return to its base to charge. This procedure is repeated infinitely often.
+
+During this process, robot `Y1` will experience `Type-I` failure and robot `Y4` will experience `Type-II` failure. They both recover automatically by adapting its lower-level controller and high-level plan. Then robot `Y3` will stop due to `Type-III` failure and its task will be re-assigned to another robot, based on online robot-to-robot communication. 
