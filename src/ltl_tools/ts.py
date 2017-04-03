@@ -33,6 +33,8 @@ class MotionFts(DiGraph):
                     and ((t_node[0], f_node[0]) not in forbid_edges)
                     and (f_node[0] != t_node[0])):
                         self.add_edge(f_node, t_node, weight=distance(f_node, t_node, alpha))
+        # for node in self.nodes_iter():
+        #     self.add_edge(node, node, weight=1)
 
     def set_initial(self, state):
         init_node = self.closest_node(state)

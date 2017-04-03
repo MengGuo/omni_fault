@@ -14,7 +14,6 @@ def dijkstra_plan_networkX(product, beta=10):
 	start = time.time()
 	runs = {}
 	loop = {}
-	cycle = {}
 	line = {}
 	# minimal circles
 	for prod_target in product.graph['accept']:
@@ -23,15 +22,16 @@ def dijkstra_plan_networkX(product, beta=10):
                 if prod_target in product.predecessors(prod_target):
                         loop[prod_target] = (product.edge[prod_target][prod_target]["weight"], [prod_target, prod_target])
                         continue
-                # else
-		loop_pre, loop_dist = dijkstra_predecessor_and_distance(product, prod_target)
-		for target_pred in product.predecessors_iter(prod_target):
-			if target_pred in loop_dist:
-				cycle[target_pred] = product.edge[target_pred][prod_target]["weight"] + loop_dist[target_pred]
-		if cycle:
-			opti_pred = min(cycle, key = cycle.get)
-			suffix = compute_path_from_pre(loop_pre, opti_pred)
-			loop[prod_target] = (cycle[opti_pred], suffix)
+                else:
+                        cycle = {}
+                        loop_pre, loop_dist = dijkstra_predecessor_and_distance(product, prod_target)
+                        for target_pred in product.predecessors_iter(prod_target):
+                                if target_pred in loop_dist:
+                                        cycle[target_pred] = product.edge[target_pred][prod_target]["weight"] + loop_dist[target_pred]
+                        if cycle:
+                                opti_pred = min(cycle, key = cycle.get)
+                                suffix = compute_path_from_pre(loop_pre, opti_pred)
+                                loop[prod_target] = (cycle[opti_pred], suffix)
 	# shortest line
 	for prod_init in product.graph['initial']:
 		line_pre, line_dist = dijkstra_predecessor_and_distance(product, prod_init)
@@ -42,10 +42,16 @@ def dijkstra_plan_networkX(product, beta=10):
 			opti_targ = min(line, key = line.get)
 			prefix = compute_path_from_pre(line_pre, opti_targ)
 			precost = line_dist[opti_targ]
+                        print 'opti_targ', opti_targ
+                        print 'product.predecessors(opti_targ)', product.predecessors(opti_targ)
 			runs[(prod_init, opti_targ)] = (prefix, precost, loop[opti_targ][1], loop[opti_targ][0])
 	# best combination
 	if runs:
 		prefix, precost, suffix, sufcost = min(runs.values(), key = lambda p: p[1] + beta*p[3])
+                print 'prefix', prefix
+                print 'suffix', suffix
+                print 'runs.keys()', runs.keys()
+                print 'runs.values()', runs.values()
 		run = ProdAut_Run(product, prefix, precost, suffix, sufcost, precost+beta*sufcost)
 		print '=================='
 		print 'Dijkstra_plan_networkX done within %.2fs: precost %.2f, sufcost %.2f' %(time.time()-start, precost, sufcost)

@@ -118,7 +118,7 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
                 start = time.time()
                 max_wait_time = 60 # seconds
                 bid_answer = dict()
-                while (time.time()-start < max_wait_time) or (!bid_answer):
+                while (time.time()-start < max_wait_time) or (not bid_answer):
                     if not rospy.is_shutdown():
                         (f_agent, t_agent, cost, dist) = bid_data
                         if (t_agent == letter) and (f_agent not in bid_answer):
