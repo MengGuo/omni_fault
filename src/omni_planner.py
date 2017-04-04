@@ -32,7 +32,7 @@ def status_callback(data):
 def request_callback(data):
     global req_data
     req_data = [data.f_agent, data.task]
-    print 'Agent <%s> request collaboration for task <%s>'%(req_data[0], req_data[1])
+    print 'Received collaboration request from Agent <%s> for task <%s>'%(req_data[0], req_data[1])
 
 def bid_callback(data):
     global bid_data
@@ -42,7 +42,7 @@ def bid_callback(data):
 def decision_callback(data):
     global dec_data
     dec_data = [data.f_agent, data.t_agent, data.chosen]
-    print 'Decision data received from Agent <%s> to Agent <%s> with content <%s>' %(str(dec_data[0]), str(dec_data[1]), str(bec_data[2]))
+    print 'Decision data received from Agent <%s> to Agent <%s> with content <%s>' %(str(dec_data[0]), str(dec_data[1]), str(dec_data[2]))
 
     
 #----------------------------------------
@@ -62,6 +62,7 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
     req_data = [None, None]
     bid_data = [None, None, None, None]    
     dec_data = [None, None, None]
+    collab_flag = False
     rospy.init_node('omni_planner_%s' %letter)
     print 'Agent <%s>: omni_planner started!' %(letter)
     ###### publish to
@@ -86,8 +87,8 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
     while not rospy.is_shutdown():
         next_activity = activity()
         ###############  reconfiguration due to self operation mode change
-        print '------------------------------'
         if op_mode != current_mode:
+            print '------------------------------'
             print '**********'
             print 'Agent <%s>: Operation mode changed from <%s> to <%s>' %(str(letter), str(current_mode), str(op_mode))
             print '**********'
@@ -130,10 +131,10 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
                 chosen_agent = min(min_dist_agent, key= lambda l: bid_answer[l][0])
                 print 'Chosen agent for collaboration: <%s>' %str(chosen_agent)
                 # send decision back
-                for f_agent in bid_answer.items():
+                for f_agent in bid_answer.keys():
                     dec_msg = decision()
                     dec_msg.f_agent = letter
-                    dec_msg.t_agent = f_agent
+                    dec_msg.t_agent = str(f_agent)
                     if f_agent == chosen_agent:
                         dec_msg.chosen = 1
                     else:
@@ -141,9 +142,9 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
                     collab_decide_pub.publish(dec_msg)
                 print 'Decision for collaboration sent from Agent <%s>!' %str(letter)
         ###############  answer to collaboration request
-        print '------------------------------'
         (f_agent, task) = req_data
-        if (f_agent != None) and (op_mode != 'type-III'):
+        if (f_agent != None) and (op_mode != 'type-III') and (not collab_flag):
+            print '------------------------------'
             print 'Collaboration request received from <%s> for task *%s*' %(str(f_agent), str(task))
             c_cost, c_dist = omni_planner.evaluate_request(task)
             bid_msg = bid()
@@ -152,62 +153,64 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
             bid_msg.cost = c_cost
             bid_msg.dist = c_dist
             collab_reply_pub.publish(bid_msg)
-            print 'collaboration message sent from agent <%s> to <%s> with d_cost <%.2f> and c_cost <%.2f>' %(str(letter), str(f_agent), c_cost, c_dist)
+            print 'Collaboration rely sent from agent <%s> to <%s> with d_cost <%.2f> and c_cost <%.2f>' %(str(letter), str(f_agent), c_cost, c_dist)
             start = time.time()
-            max_wait_time = 10 # seconds
-            while (time.time()-start < max_wait_time):
+            max_wait_time = 60 # seconds
+            while (time.time()-start < max_wait_time) and (not collab_flag):
                 if not rospy.is_shutdown():
                     (c_f_agent, c_t_agent, c_chosen) = dec_data
                     if (c_f_agent == f_agent) and (c_t_agent == letter) and (c_chosen == 1):
-                        print 'agent <%s> chosen for collaboration' %str(c_t_agent)
+                        print 'Agent <%s> chosen for collaboration' %str(c_t_agent)
                         omni_planner.confirm_request(task)
                         header = 0
+                        collab_flag = True
             if c_t_agent == None:
-                print 'no confirmation received'
-            else:
-                print 'not chosen as the collaborator'
+                print 'No confirmation received'
+            elif c_t_agent != letter:
+                print 'Not chosen as the collaborator'
             req_data = [None, None]
-        print '------------------------------'                        
         #----------------------------------------
         ############### send next move
-        next_move = omni_planner.next_move
-        ############### implement next activity
-        if isinstance(next_move, str):
-            # next activity is action
-            next_activity.header = header
-            next_activity.type = next_move
-            next_activity.x = 0.0
-            next_activity.y = 0.0
-            print 'Agent <%s>: next action <%s>! header: <%d>' %(letter, next_activity.type, header)
-            while not ((confirm[0] == header) and (confirm[1]==next_move) and (confirm[2]>0)):
-                if (not rospy.is_shutdown()) and (op_mode != 'type-III'):
-                    activity_pub.publish(next_activity)
-                    rospy.sleep(0.06)
-                else:
-                    break
-            rospy.sleep(1)
-            confirm[2] = 0
-            header = header + 1
-            print 'Agent <%s>: action <%s> done!' %(letter, next_activity.type)
-        else:
-            print 'Agent <%s>: next waypoint <(%.2f,%.2f,%.2f)>! header: <%d>' %(letter, next_move[0][0], next_move[0][1], next_move[1], header)
-            while not ((confirm[0] == header) and (confirm[1]=='goto') and (confirm[2]>0)):
-                if (not rospy.is_shutdown()) and (op_mode != 'type-III'):
-                    next_activity.type = 'goto'
-                    next_activity.header = header
-                    next_activity.x = next_move[0][0]
-                    next_activity.y = next_move[0][1]
-                    next_activity.psi = next_move[1]
-                    activity_pub.publish(next_activity)
-                    rospy.sleep(0.06)
-                else:
-                    break
-            rospy.sleep(1)
-            confirm[2] = 0
-            header = header + 1
-            print 'Agent <%s>: waypoint <(%.2f,%.2f,%.2f)> reached!' %(letter, next_move[0][0], next_move[0][1], next_move[1])
-            omni_planner.cur_pose = [next_move[0], next_move[1]]
-        omni_planner.find_next_move()    
+        if (op_mode != 'type-III'):
+            print '------------------------------'
+            next_move = omni_planner.next_move
+            ############### implement next activity
+            if isinstance(next_move, str):
+                # next activity is action
+                next_activity.header = header
+                next_activity.type = next_move
+                next_activity.x = 0.0
+                next_activity.y = 0.0
+                print 'Agent <%s>: next action <%s>! header: <%d>' %(letter, next_activity.type, header)
+                while not ((confirm[0] == header) and (confirm[1]==next_move) and (confirm[2]>0)):
+                    if (not rospy.is_shutdown()) and (op_mode != 'type-III'):
+                        activity_pub.publish(next_activity)
+                        rospy.sleep(0.06)
+                    else:
+                        break
+                rospy.sleep(1)
+                confirm[2] = 0
+                header = header + 1
+                print 'Agent <%s>: action <%s> done!' %(letter, next_activity.type)
+            else:
+                print 'Agent <%s>: next waypoint <(%.2f,%.2f,%.2f)>! header: <%d>' %(letter, next_move[0][0], next_move[0][1], next_move[1], header)
+                while not ((confirm[0] == header) and (confirm[1]=='goto') and (confirm[2]>0)):
+                    if (not rospy.is_shutdown()) and (op_mode != 'type-III'):
+                        next_activity.type = 'goto'
+                        next_activity.header = header
+                        next_activity.x = next_move[0][0]
+                        next_activity.y = next_move[0][1]
+                        next_activity.psi = next_move[1]
+                        activity_pub.publish(next_activity)
+                        rospy.sleep(0.06)
+                    else:
+                        break
+                rospy.sleep(1)
+                confirm[2] = 0
+                header = header + 1
+                print 'Agent <%s>: waypoint <(%.2f,%.2f,%.2f)> reached!' %(letter, next_move[0][0], next_move[0][1], next_move[1])
+                omni_planner.cur_pose = [next_move[0], next_move[1]]
+            omni_planner.find_next_move()    
  
 def omni_planner_agent(agent_letter):
     if agent_letter in robot_model:

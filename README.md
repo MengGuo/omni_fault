@@ -18,7 +18,7 @@ python omni_planner.py Y1
 - Manually send confirmation for robot next activity:
 ```
 rostopic pub -1 activity_done_Y1 omni_fault/confirmation -- '0' 'goto' '1'
-rostopic pub -1 activity_done_Y1 omni_fault/confirmation -- '1' 'y1act' '1'
+rostopic pub -1 activity_done_Y1 omni_fault/confirmation -- '1' 'la1' '1'
 ```
 
 - Manually send operation mode update (*faults*) to robot via
@@ -43,7 +43,12 @@ python omni_planner.py Y4
 ```
 rostopic pub -1  status_Y2 omni_fault/status -- 'type-III'
 ```
-  Then you will see the request and reply messages exchanged among the robots to negotiate which robot will share the task for `Y2`. Once the other robots accomplish their current motion or action (you could do it manually), then the task of `Y2` will be assigned to one robot, depending on the reply messages. 
+  Then you will see the request and reply messages exchanged among the robots to negotiate which robot will share the task for `Y2`. Once the other robots accomplish their current motion or action (you could do it manually), e.g.,
+```
+rostopic pub -1 activity_done_Y3 omni_fault/confirmation -- '0' 'goto' '1'
+rostopic pub -1 activity_done_Y4 omni_fault/confirmation -- '0' 'goto' '1'
+```
+  then the task of `Y2` will be assigned to one robot, depending on the reply messages. 
 
 
 ## Scenario description

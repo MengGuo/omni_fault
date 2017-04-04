@@ -57,10 +57,23 @@ node_label = {
     (1.0, 4.0): set(['lb2',]),
     (1.0, 5.0): set(['ua',]),
     (4.0, 4.0): set(['h1',]),
-    (5.0, 4.0): set(['h2',]),
+    (5.0, 5.0): set(['h2',]),
 }
 
-comb_nodes, symbols = combine_wps_angle(node_label, angle_label)
+#comb_nodes, symbols = combine_wps_angle(node_label, angle_label)
+
+comb_nodes = {
+    ((3.0, 1.0), -3.14): set(['la1','w']),
+    ((4.0, 1.0), 0.0): set(['la2','e']),
+    ((5.0, 1.0), 1.57): set(['ub','n']),    
+    ((1.0, 3.0), -3.14): set(['lb1','w']),
+    ((1.0, 4.0), 0.0): set(['lb2','e']),
+    ((1.0, 5.0), 1.57): set(['ua','n']),
+    ((4.0, 4.0), -1.57): set(['h1','s']),
+    ((5.0, 5.0), -1.57): set(['h2','s']),
+}
+
+symbols = set(['la1','la2','ua','lb1','lb2','ub','w','e','n','s'])
 
 f_edges1 = ((3.0,1.0), (4.0,1.0),(1.0,3.0), (1.0,4.0))
 f_edges2 = ((5.0,1.0),(1.0,5.0))
@@ -86,8 +99,8 @@ Y1_motion.add_edges(forbid_edges, Y1_alpha)
 Y1_action = ActionModel(action_label)
 ########### Y1 task ############
 one_la = '(la1 && w) || (la2 && e)'
-one_ua = '(ua && s)'
-Y1_task = '[] <> ((%s && loada) && <> (%s && unloada)) && [] <> (h2 && e)' %(one_la, one_ua)
+one_ua = '(ua && n)'
+Y1_task = '[] <> ((%s && loada) && <> (%s && unloada)) && [] <> (h2 && s)' %(one_la, one_ua)
 ########### Y1 initialize ############
 Y1_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-II': [0.1, 10.0]}
 robot_model['Y1']=(Y1_motion, Y1_action, Y1_task, Y1_mode_alpha)
@@ -105,8 +118,8 @@ Y2_motion.add_edges(forbid_edges, Y2_alpha)
 Y2_action = ActionModel(action_label)
 ########### Y2 task ############
 one_la = '(la1 && w) || (la2 && e)'
-one_ua = '(ua && s)'
-Y2_task = '[] <> ((%s && loada) && <> (%s && unloada)) && [] <> (h1 && e)' %(one_la, one_ua)
+one_ua = '(ua && n)'
+Y2_task = '[] <> ((%s && loada) && <> (%s && unloada)) && [] <> (h1 && s)' %(one_la, one_ua)
 ########### Y2 initialize ############
 Y2_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-II': [0.1, 10.0]}
 robot_model['Y2']=(Y2_motion, Y2_action, Y2_task, Y2_mode_alpha)
@@ -124,8 +137,8 @@ Y3_motion.add_edges(forbid_edges, Y3_alpha)
 Y3_action = ActionModel(action_label)
 ########### Y3 task ############
 one_lb = '(lb1 && w) || (lb2 && e)'
-one_ub = '(ub && s)'
-Y3_task = '[] <> ((%s && loadb) && <> (%s && unloadb)) && [] <> (h1 && e)' %(one_lb, one_ub)
+one_ub = '(ub && n)'
+Y3_task = '[] <> ((%s && loadb) && <> (%s && unloadb)) && [] <> (h1 && s)' %(one_lb, one_ub)
 ########### Y3 initialize ############
 Y3_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-II': [0.1, 10.0]}
 robot_model['Y3']=(Y3_motion, Y3_action, Y3_task, Y3_mode_alpha)
@@ -143,8 +156,8 @@ Y4_motion.add_edges(forbid_edges, Y4_alpha)
 Y4_action = ActionModel(action_label)
 ########### Y4 task ############
 one_lb = '(lb1 && w) || (lb2 && e)'
-one_ub = '(ub && s)'
-Y4_task = '[] <> ((%s && loadb) && <> (%s && unloadb)) && [] <> (h2 && e)' %(one_lb, one_ub)
+one_ub = '(ub && n)'
+Y4_task = '[] <> ((%s && loadb) && <> (%s && unloadb)) && [] <> (h2 && s)' %(one_lb, one_ub)
 ########### Y4 initialize ############
 Y4_mode_alpha = {'normal': [1.0, 1.0], 'type-I': [0.1, 1.0], 'type-II': [0.1, 10.0]}
 robot_model['Y4']=(Y4_motion, Y4_action, Y4_task, Y4_mode_alpha)

@@ -115,6 +115,7 @@ class ltl_planner(object):
                 test_product = ProdAut(self.ts, test_buchi)
                 test_product.build_full()
                 test_run, test_time = dijkstra_plan_networkX(test_product, self.beta)
+                self.test_run = test_run
                 test_edges = test_run.prod_run_to_prod_edges(test_product)
                 total_c = 0
                 total_d = 0
@@ -127,10 +128,14 @@ class ltl_planner(object):
                 return total_c, total_d
 
         def confirm_request(self, task):
-                self.__init__(self.ts, hard_spec, task)
-                self.product_build_full()
-                self.optimal(10)
-                
+                self.__init__(self.ts, self.hard_spec, task)
+                self.product.build_full()
+                #self.optimal(10)
+                self.run = self.test_run
+                self.index = 1
+		self.segment = 'line'
+		self.next_move = self.run.pre_plan[self.index]
+                print 'New task incorporated!'
 
 
 
