@@ -56,7 +56,7 @@ class ltl_planner(object):
 		self.opt_log.append((self.Time, self.run.pre_plan, self.run.suf_plan, self.run.precost, self.run.sufcost, self.run.totalcost))
 		self.last_time = self.Time
 		self.acc_change = 0
-		self.index = 1
+		self.index = 0
 		self.segment = 'line'
 		self.next_move = self.run.pre_plan[self.index]
 		return plantime
@@ -66,7 +66,7 @@ class ltl_planner(object):
 			self.trace.append(self.run.line[self.index])
 			self.index += 1
 			self.next_move = self.run.pre_plan[self.index]
-		elif self.segment == 'line' and self.index == len(self.run.pre_plan)-2:
+		elif (self.segment == 'line' and self.index == len(self.run.pre_plan)-2) or (len(self.run.pre_plan) <= 2):
 			self.trace.append(self.run.line[self.index])
 			self.index = 0
 			self.segment = 'loop'
@@ -76,7 +76,7 @@ class ltl_planner(object):
 			self.index += 1
 			self.segment = 'loop'
 			self.next_move = self.run.suf_plan[self.index]
-		elif self.segment == 'loop' and self.index == len(self.run.suf_plan)-2:
+		elif (self.segment == 'loop' and self.index == len(self.run.suf_plan)-2) or (len(self.run.suf_plan) <= 2):
 			self.trace.append(self.run.loop[self.index])
 			self.index = 0
 			self.segment = 'loop'
@@ -101,7 +101,7 @@ class ltl_planner(object):
 		new_run = improve_plan_given_history(self.product, self.trace)
 		if (new_run) and (new_run.pre_plan !=self.run.pre_plan[self.index:-1]):
 			self.run = new_run
-			self.index = 1
+			self.index = 0
 			self.segment = 'line'
 			self.next_move = self.run.pre_plan[self.index]
 			print 'Plan adapted!'
@@ -132,7 +132,7 @@ class ltl_planner(object):
                 self.product.build_full()
                 #self.optimal(10)
                 self.run = self.test_run
-                self.index = 1
+                self.index = 0
 		self.segment = 'line'
 		self.next_move = self.run.pre_plan[self.index]
                 print 'New task incorporated!'
