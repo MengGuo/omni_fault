@@ -210,9 +210,9 @@ def omni_planner(letter, ts, act, task_formula, mode_alpha):
                 header = header + 1
                 print 'Agent <%s>: waypoint <(%.2f,%.2f,%.2f)> reached!' %(letter, next_move[0][0], next_move[0][1], next_move[1])
                 omni_planner.cur_pose = [next_move[0], next_move[1]]
-            print 'omni_planner.segment', omni_planner.segment
-            print 'omni_planner.index', omni_planner.index
             omni_planner.find_next_move()
+            # print 'omni_planner.segment', omni_planner.segment
+            # print 'omni_planner.index', omni_planner.index            
  
 def omni_planner_agent(agent_letter):
     if agent_letter in robot_model:
